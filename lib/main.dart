@@ -27,10 +27,16 @@ class _MyCalculatorState extends State<MyCalculator> {
   String strResult = '0';
   String operator = '';
   double firstNumber;
+  double secondNumber;
+  double forMultipleOperations=0;
   String memory= '';
   bool isResultShown=false;
   bool isFirstNumberAfterOperationButton = true;
-  String lastResult;
+  bool isOperation=true;
+
+
+
+
 
   clearFunc()
   {
@@ -40,62 +46,129 @@ class _MyCalculatorState extends State<MyCalculator> {
     firstNumber=null;
     isResultShown=false;
     isFirstNumberAfterOperationButton = true;
+    memory='';
+    forMultipleOperations=0;
   }
 
   void onDigitPress(String text) {
-    print('digit pressed $text');
+    //print('digit pressed $text');
 
     if (text == '+') {
       operator = text;
+
       firstNumber = result;
+
       isFirstNumberAfterOperationButton = true;
+      if(isOperation){
+        forMultipleOperations=forMultipleOperations+firstNumber;
+      if(!isResultShown){
+        memory=memory+firstNumber.toString()+'+';
+      }else if(isResultShown){
+        memory=result.toString()+'+';
+      }
+        isOperation=false;}
       strResult = '';
       setState(() {});
     }else if(text=='-'){
+
       operator = text;
       firstNumber = result;
+
       isFirstNumberAfterOperationButton = true;
+      if(isOperation){
+        if(forMultipleOperations!=0){
+          forMultipleOperations=forMultipleOperations-firstNumber;}
+        else forMultipleOperations=firstNumber;
+        if(!isResultShown){
+          memory=memory+firstNumber.toString()+'-';
+        }else if(isResultShown){
+          memory=result.toString()+'-';
+        }
+        isOperation=false;}
       strResult = '';
       setState(() {});
+      isResultShown=false;
     }else if(text=='÷'){
       operator = text;
       firstNumber = result;
+
       isFirstNumberAfterOperationButton = true;
+      if(isOperation){
+        if(forMultipleOperations!=0){
+          forMultipleOperations=forMultipleOperations/firstNumber;}
+        else forMultipleOperations=firstNumber;
+        if(!isResultShown){
+          memory=memory+firstNumber.toString()+'÷';
+        }else if(isResultShown){
+          memory=result.toString()+'÷';
+        }
+        isOperation=false;}
       strResult = '';
       setState(() {});
     }else if(text=='*'){
       operator = text;
       firstNumber = result;
+
       isFirstNumberAfterOperationButton = true;
+      if(isOperation){
+        if(forMultipleOperations!=0){
+          forMultipleOperations=forMultipleOperations*firstNumber;}
+        else forMultipleOperations=firstNumber;
+        if(!isResultShown){
+          memory=memory+firstNumber.toString()+'*';
+        }else if(isResultShown){
+          memory=result.toString()+'*';
+        }
+        isOperation=false;}
       strResult = '';
       setState(() {});
     }
     else if (text == '=') {
+
+      if(!isResultShown)
+        {
+          memory=memory+result.toString()+'=';
+        }
+      else if(isResultShown)
+        {
+          memory=result.toString()+operator+secondNumber.toString()+'=';
+        }
       switch (operator) {
         case '+':
           setState(() {
-            result = result + firstNumber;
+            if(!isResultShown){
+            result = result + forMultipleOperations; forMultipleOperations=0;}
+            else if(isResultShown){result=result+secondNumber; forMultipleOperations=0;}
           });
           strResult = '$result';
           isResultShown=true;
           break;
         case '-':
           setState(() {
-            result = result - firstNumber;
+            if(!isResultShown){
+            result = forMultipleOperations-result; forMultipleOperations=0;}
+            else if(isResultShown){result=result-secondNumber; forMultipleOperations=0; }
           });
           strResult = '$result';
           isResultShown=true;
           break;
         case '÷':
           setState(() {
-            result = result / firstNumber;
+            if(!isResultShown)
+              {
+            result = forMultipleOperations/result; forMultipleOperations=0;}
+            else if(isResultShown){result=result/secondNumber; forMultipleOperations=0;}
           });
           strResult = '$result';
           isResultShown=true;
           break;
         case '*':
           setState(() {
-            result = result * firstNumber;
+            if(!isResultShown)
+              {
+            result = result * forMultipleOperations; forMultipleOperations=0;}
+            else if(isResultShown) {result=result*secondNumber; forMultipleOperations=0;}
+
           });
           strResult = '$result';
           isResultShown=true;
@@ -115,7 +188,7 @@ class _MyCalculatorState extends State<MyCalculator> {
           }
           strResult = strResult.substring(0, strResult.length - 1);
           if (strResult.length == 0) {
-            clearFunc();
+            result=0;
           }
 
           var temp = double.tryParse(strResult);
@@ -123,9 +196,12 @@ class _MyCalculatorState extends State<MyCalculator> {
             result = temp ?? result;
           });
         }
+
+
       }
     else {
       var tempResult;
+
       if (isFirstNumberAfterOperationButton) {
         tempResult = text;
         isFirstNumberAfterOperationButton = false;
@@ -135,14 +211,18 @@ class _MyCalculatorState extends State<MyCalculator> {
       if(isResultShown){tempResult=text; isResultShown=false;}
       var temp = double.tryParse(tempResult);
       if (temp != null) {
-        lastResult=strResult;
+
         strResult = tempResult;
+
+
         setState(() {
           result = temp ?? result;
+          secondNumber=result;
+
         });
       }
+      isOperation=true;
     }
-    print(strResult[strResult.length-1]);
   }
 
   @override
